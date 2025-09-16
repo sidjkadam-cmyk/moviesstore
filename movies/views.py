@@ -14,15 +14,17 @@ def index(request):
     template_data['movies'] = movies
     return render(request, 'movies/index.html',
                   {'template_data': template_data})
+
 def show(request, id):
     movie = Movie.objects.get(id=id)
-    reviews = Review.objects.filter(movie=movie)
+    reviews = Review.objects.filter(movie=movie, is_reported=False)
     template_data = {}
     template_data['title'] = movie.name
     template_data['movie'] = movie
     template_data['reviews'] = reviews
     return render(request, 'movies/show.html',
                   {'template_data': template_data})
+
 @login_required
 def create_review(request, id):
     if request.method == 'POST' and request.POST['comment'] != '':
@@ -35,6 +37,7 @@ def create_review(request, id):
         return redirect('movies.show', id=id)
     else:
         return redirect('movies.show', id=id)
+
 @login_required
 def edit_review(request, id, review_id):
     review = get_object_or_404(Review, id=review_id)
@@ -53,9 +56,17 @@ def edit_review(request, id, review_id):
         return redirect('movies.show', id=id)
     else:
         return redirect('movies.show', id=id)
+
 @login_required
 def delete_review(request, id, review_id):
     review = get_object_or_404(Review, id=review_id,
         user=request.user)
     review.delete()
+    return redirect('movies.show', id=id)
+
+@login_required
+def report_review(request, id, review_id):
+    review = get_object_or_404(Review, id=review_id, movie_id=id)
+    review.is_reported = True
+    review.save()
     return redirect('movies.show', id=id)
