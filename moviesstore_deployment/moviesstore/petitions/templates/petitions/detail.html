@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+<div class="p-3">
+  <div class="container">
+    <div class="row mt-3">
+      <div class="col-md-8 mx-auto">
+        <div class="card">
+          <div class="card-body">
+            <h2 class="card-title">{{ petition.movie_title }} ({{ petition.year }})</h2>
+            <h5 class="card-subtitle mb-3 text-muted">{{ petition.title }}</h5>
+            
+            {% if petition.genre %}
+              <span class="badge bg-secondary mb-3">{{ petition.genre }}</span>
+            {% endif %}
+            
+            <div class="mb-3">
+              <h6>Description:</h6>
+              <p class="card-text">{{ petition.description }}</p>
+            </div>
+            
+            <div class="row mb-4">
+              <div class="col-md-4">
+                <div class="text-center p-3 bg-light rounded">
+                  <h4 class="text-success">{{ yes_votes }}</h4>
+                  <small class="text-muted">Yes Votes</small>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="text-center p-3 bg-light rounded">
+                  <h4 class="text-danger">{{ no_votes }}</h4>
+                  <small class="text-muted">No Votes</small>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="text-center p-3 bg-light rounded">
+                  <h4 class="text-primary">{{ total_votes }}</h4>
+                  <small class="text-muted">Total Votes</small>
+                </div>
+              </div>
+            </div>
+            
+            {% if user.is_authenticated %}
+              {% if user_vote %}
+                <div class="alert alert-info">
+                  <i class="fas fa-info-circle"></i> 
+                  You voted <strong>{{ user_vote.vote_type|title }}</strong> on this petition.
+                </div>
+              {% endif %}
+              
+              <form method="POST" action="{% url 'petitions.vote' petition.id %}">
+                {% csrf_token %}
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                  <button type="submit" name="vote_type" value="yes" class="btn btn-success me-md-2">
+                    <i class="fas fa-thumbs-up"></i> Vote Yes
+                  </button>
+                  <button type="submit" name="vote_type" value="no" class="btn btn-danger">
+                    <i class="fas fa-thumbs-down"></i> Vote No
+                  </button>
+                </div>
+              </form>
+            {% else %}
+              <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> 
+                Please <a href="{% url 'accounts.login' %}">login</a> to vote on this petition.
+              </div>
+            {% endif %}
+            
+            <hr>
+            <div class="d-flex justify-content-between align-items-center">
+              <small class="text-muted">
+                Created by <strong>{{ petition.created_by.username }}</strong> 
+                on {{ petition.created_at|date:"F d, Y" }}
+              </small>
+              <a href="{% url 'petitions.index' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Back to Petitions
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
